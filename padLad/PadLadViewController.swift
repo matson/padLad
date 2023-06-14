@@ -11,7 +11,7 @@ class PadLadViewController: UITableViewController{
     
     //all TableView things are handled using this specific class/protocol
     
-    let itemArray = ["clean kitchen", "find a man", "kiss a boy"]
+   var itemArray = ["clean kitchen", "find a man", "kiss a boy"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +37,7 @@ class PadLadViewController: UITableViewController{
         
     }
     
-    //MARK - Tableview Datasource Methods.
+    //MARK: - Tableview Datasource Methods.
     
     //number of rows
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -54,11 +54,11 @@ class PadLadViewController: UITableViewController{
         return cell
     }
     
-    //MARK - TableView Delegate Methods
+    //MARK: - TableView Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let cell = itemArray[indexPath.row]
+            //        let cell = itemArray[indexPath.row]
         
         if(tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark){
             tableView.cellForRow(at: indexPath)?.accessoryType = .none
@@ -70,6 +70,36 @@ class PadLadViewController: UITableViewController{
         tableView.deselectRow(at: indexPath, animated: true)
         
        
+    }
+    
+    //MARK: Add Button
+    
+    
+    @IBAction func addButton(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        
+        //alerts
+        let alert = UIAlertController(title: "Add New Item", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Item", style: .default){(action) in
+            
+            //what will happen once the user clicks the add item button
+            self.itemArray.append(textField.text!)
+            
+            //this is needed to show the new data. 
+            self.tableView.reloadData()
+            
+        }
+        //show textfield
+        alert.addTextField {(alertTextField) in
+            alertTextField.placeholder = "Create new item here"
+            textField = alertTextField
+            
+        }
+        //show action
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
     }
     
     
