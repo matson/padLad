@@ -37,7 +37,7 @@ class PadLadViewController: UITableViewController{
         
     }
     
-    // MARK - Tableview Datasource Methods.
+    //MARK - Tableview Datasource Methods.
     
     //number of rows
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -53,6 +53,26 @@ class PadLadViewController: UITableViewController{
         cell.textLabel?.text  = itemArray[indexPath.row]
         return cell
     }
+    
+    //MARK - TableView Delegate Methods
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let cell = itemArray[indexPath.row]
+        
+        if(tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark){
+            tableView.cellForRow(at: indexPath)?.accessoryType = .none
+        }else{
+            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+        }
+        
+        //goes back to being white.
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+       
+    }
+    
+    
     
 
 
