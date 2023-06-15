@@ -11,11 +11,26 @@ class PadLadViewController: UITableViewController{
     
     //all TableView things are handled using this specific class/protocol
     
-   var itemArray = ["clean kitchen", "find a man", "kiss a boy"]
+   var itemArray = [Item]()
+   
+    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        let newItem = Item()
+        newItem.title = "Find Mike"
+        itemArray.append(newItem)
+        let newItem2 = Item()
+        newItem2.title = "Buy Eggos"
+        itemArray.append(newItem2)
+        
+        //DEFAULTS: setting the defaults to the array
+//        if let items  = defaults.array(forKey: "PadLadArray") as? [String]{
+//            itemArray = items
+//
+//        }
         
         //NavBar SetUp:
         let newNavBarAppearance = UINavigationBarAppearance()
@@ -50,7 +65,15 @@ class PadLadViewController: UITableViewController{
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "PadLadCell", for: indexPath)
-        cell.textLabel?.text  = itemArray[indexPath.row]
+        
+        let item = itemArray[indexPath.row]
+        
+        cell.textLabel?.text  = item.title
+        
+        //Ternary Operator:
+        //checkmark logic
+        cell.accessoryType = item.done == true ? .checkmark : .none
+        
         return cell
     }
     
@@ -60,11 +83,11 @@ class PadLadViewController: UITableViewController{
         
             //        let cell = itemArray[indexPath.row]
         
-        if(tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark){
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }else{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+       
+        
+        //forced tableview to call datasource methods again
+        tableView.reloadData()
         
         //goes back to being white.
         tableView.deselectRow(at: indexPath, animated: true)
@@ -85,7 +108,12 @@ class PadLadViewController: UITableViewController{
         let action = UIAlertAction(title: "Add Item", style: .default){(action) in
             
             //what will happen once the user clicks the add item button
-            self.itemArray.append(textField.text!)
+            let newItem = Item()
+            newItem.title = textField.text!
+            self.itemArray.append(newItem)
+            
+            //add the itemArray in defaults
+            self.defaults.set(self.itemArray, forKey: "PadLadArray")
             
             //this is needed to show the new data. 
             self.tableView.reloadData()
