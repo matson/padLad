@@ -6,28 +6,33 @@
 //
 
 import UIKit
+import CoreData
 
 class PadLadViewController: UITableViewController{
     
     //all TableView things are handled using this specific class/protocol
     
    var itemArray = [Item]()
+    
+   //CoreData context
+   let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
    
-    let defaults = UserDefaults.standard
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+    
+        loadItems()
         
-        let newItem = Item()
-        newItem.title = "Find Mike"
-        itemArray.append(newItem)
-        let newItem2 = Item()
-        newItem2.title = "Buy Eggos"
-        itemArray.append(newItem2)
+
+//        let newItem = Item()
+//        newItem.title = "Find Mike"
+//        itemArray.append(newItem)
+//        let newItem2 = Item()
+//        newItem2.title = "Buy Eggos"
+//        itemArray.append(newItem2)
         
         //DEFAULTS: setting the defaults to the array
-//        if let items  = defaults.array(forKey: "PadLadArray") as? [String]{
+//        if let items  = defaults.array(forKey: "PadLadArray") as? [Item] {
 //            itemArray = items
 //
 //        }
@@ -84,10 +89,11 @@ class PadLadViewController: UITableViewController{
             //        let cell = itemArray[indexPath.row]
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-       
         
+        saveItems()
+       
         //forced tableview to call datasource methods again
-        tableView.reloadData()
+        //tableView.reloadData()
         
         //goes back to being white.
         tableView.deselectRow(at: indexPath, animated: true)
@@ -96,7 +102,6 @@ class PadLadViewController: UITableViewController{
     }
     
     //MARK: Add Button
-    
     
     @IBAction func addButton(_ sender: UIBarButtonItem) {
         
@@ -108,12 +113,11 @@ class PadLadViewController: UITableViewController{
         let action = UIAlertAction(title: "Add Item", style: .default){(action) in
             
             //what will happen once the user clicks the add item button
-            let newItem = Item()
-            newItem.title = textField.text!
-            self.itemArray.append(newItem)
             
-            //add the itemArray in defaults
-            self.defaults.set(self.itemArray, forKey: "PadLadArray")
+            let newItem = Item(context: self.context)
+            newItem.title = textField.text!
+            newItem.done = false
+            self.itemArray.append(newItem)
             
             //this is needed to show the new data. 
             self.tableView.reloadData()
@@ -131,8 +135,26 @@ class PadLadViewController: UITableViewController{
     }
     
     
+    //CREATE
+    func saveItems(){
+        do{
+            try context.save()
+        }catch{
+            print("Error saving context \(error)")
+        }
+        
+        self.tableView.reloadData()
+    }
     
-
-
+    //READ
+    func loadItems(){
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        do{
+            itemArray = try context.fetch(request)
+        } catch {
+            print("error fetching data from context \(error)")
+        }
+        
+    }
 }
 
