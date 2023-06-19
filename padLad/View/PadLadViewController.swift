@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class PadLadViewController: UITableViewController{
+class PadLadViewController: UITableViewController {
     
     //all TableView things are handled using this specific class/protocol
     
@@ -20,7 +20,9 @@ class PadLadViewController: UITableViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-    
+        
+        
+        
         loadItems()
         
 
@@ -118,6 +120,8 @@ class PadLadViewController: UITableViewController{
             newItem.title = textField.text!
             newItem.done = false
             self.itemArray.append(newItem)
+            print("added new item")
+            self.saveItems()
             
             //this is needed to show the new data. 
             self.tableView.reloadData()
@@ -134,11 +138,12 @@ class PadLadViewController: UITableViewController{
         present(alert, animated: true, completion: nil)
     }
     
-    
+    //MARK: Model Manipulation Methods
     //CREATE
     func saveItems(){
         do{
             try context.save()
+            print("saved items")
         }catch{
             print("Error saving context \(error)")
         }
@@ -147,14 +152,52 @@ class PadLadViewController: UITableViewController{
     }
     
     //READ
-    func loadItems(){
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    //This method has a default value
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
+       
         do{
             itemArray = try context.fetch(request)
+            print("loaded")
         } catch {
             print("error fetching data from context \(error)")
         }
         
+        tableView.reloadData()
+        
+        
     }
+    
 }
 
+//MARK: SearchBar
+extension PadLadViewController: UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        //query database
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
+        let predicate = NSPredicate(format: "title CONTAINS %@", searchBar.text!)
+        
+        request.predicate = predicate
+        
+        let sortDescriptr = NSSortDescriptor(key: "title", ascending: true)
+        request.sortDescriptors = [sortDescriptr]
+        
+        loadItems(with: request)
+        
+        
+    }
+    
+    //to clear up the history in search bar
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+           
+        }
+    }
+    
+}
