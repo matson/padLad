@@ -7,7 +7,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--LadPad-->
+        <!--Items-->
         <scene sceneID="nq3-JP-l2R">
             <objects>
                 <tableViewController id="qGZ-39-hdT" customClass="PadLadViewController" customModule="padLad" customModuleProvider="target" sceneMemberID="viewController">
@@ -24,7 +24,7 @@
                             </connections>
                         </searchBar>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="PadLadCell" id="daQ-oS-5e1">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="daQ-oS-5e1" customClass="SwipeTableViewCell" customModule="SwipeCellKit">
                                 <rect key="frame" x="0.0" y="94" width="390" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="daQ-oS-5e1" id="bol-3n-8Qk">
@@ -38,37 +38,80 @@
                             <outlet property="delegate" destination="qGZ-39-hdT" id="1ud-3z-Mqn"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="LadPad" id="WMw-UZ-7hI">
+                    <navigationItem key="navigationItem" title="Items" id="WMw-UZ-7hI">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="Wfr-eq-xCF">
-                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
                                 <action selector="addButton:" destination="qGZ-39-hdT" id="SM9-kw-0Zy"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="searchBar" destination="V8U-nR-KdY" id="lyQ-D7-4oc"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rcr-Kk-ggI" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1293.8461538461538" y="-26.303317535545023"/>
+            <point key="canvasLocation" x="1663" y="-26"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="dSa-DK-xa6">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="0Tq-07-J3w" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Ptu-sa-N8c">
-                        <rect key="frame" x="0.0" y="47" width="390" height="44"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" largeTitles="YES" id="Ptu-sa-N8c">
+                        <rect key="frame" x="0.0" y="47" width="390" height="96"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="backgroundColor" red="0.28568652267916406" green="0.47037046755264217" blue="0.82541519385027018" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                        <color key="backgroundColor" red="0.37648803510000001" green="0.61987121919999999" blue="0.87043690679999997" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
-                        <segue destination="qGZ-39-hdT" kind="relationship" relationship="rootViewController" id="Zvh-20-zJM"/>
+                        <segue destination="f65-fC-6Hy" kind="relationship" relationship="rootViewController" id="bqb-q4-Uh0"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aAY-12-kXT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="592" y="-26"/>
+            <point key="canvasLocation" x="228" y="-26"/>
+        </scene>
+        <!--LadPad-->
+        <scene sceneID="FFh-Eu-vVG">
+            <objects>
+                <tableViewController id="f65-fC-6Hy" customClass="CategoryViewController" customModule="padLad" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="oKw-P9-fB3">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="gz6-Q5-DXW" customClass="SwipeTableViewCell" customModule="SwipeCellKit">
+                                <rect key="frame" x="0.0" y="50" width="390" height="43.666667938232422"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="gz6-Q5-DXW" id="NeW-rs-LU2">
+                                    <rect key="frame" x="0.0" y="0.0" width="390" height="43.666667938232422"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="f65-fC-6Hy" id="zNe-iB-9IQ"/>
+                            <outlet property="delegate" destination="f65-fC-6Hy" id="0AJ-FQ-PUu"/>
+                        </connections>
+                    </tableView>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="LadPad" id="Jnm-TT-QH4">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="bvy-Kn-87Z">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="addButton:" destination="f65-fC-6Hy" id="pKO-h5-cKh"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <segue destination="qGZ-39-hdT" kind="show" identifier="goToItems" id="VXZ-ZE-k3g"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dbp-oj-PYF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="946" y="-26"/>
         </scene>
     </scenes>
     <resources>

@@ -7,56 +7,68 @@
 
 import UIKit
 import CoreData
+import RealmSwift
+import ChameleonFramework
 
-class PadLadViewController: UITableViewController {
+class PadLadViewController: SwipeTableViewController {
     
-    //all TableView things are handled using this specific class/protocol
+    @IBOutlet weak var searchBar: UISearchBar!
     
-   var itemArray = [Item]()
+    var padItems: Results<Item>?
+    
+   let realm = try! Realm()
+    
+    var selectedCategory : Category? {
+        didSet{
+            loadItems()
+        }
+    }
     
    //CoreData context
-   let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+   //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
    
     override func viewDidLoad() {
         super.viewDidLoad()
+       
         // Do any additional setup after loading the view.
-        
-        
-        
-        loadItems()
-        
 
-//        let newItem = Item()
-//        newItem.title = "Find Mike"
-//        itemArray.append(newItem)
-//        let newItem2 = Item()
-//        newItem2.title = "Buy Eggos"
-//        itemArray.append(newItem2)
-        
-        //DEFAULTS: setting the defaults to the array
-//        if let items  = defaults.array(forKey: "PadLadArray") as? [Item] {
-//            itemArray = items
-//
-//        }
+        //        let newItem = Item()
+        //        newItem.title = "Find Mike"
+        //        itemArray.append(newItem)
+        //        let newItem2 = Item()
+        //        newItem2.title = "Buy Eggos"
+        //        itemArray.append(newItem2)
+                
+                //DEFAULTS: setting the defaults to the array
+        //        if let items  = defaults.array(forKey: "PadLadArray") as? [Item] {
+        //            itemArray = items
+        //
+        //        }
         
         //NavBar SetUp:
-        let newNavBarAppearance = UINavigationBarAppearance()
-         newNavBarAppearance.configureWithTransparentBackground()
-    
+        //let newNavBarAppearance = UINavigationBarAppearance()
+         //newNavBarAppearance.configureWithTransparentBackground()
+       
         // Navigation bar's background color
-        newNavBarAppearance.backgroundColor = UIColor(red: 73/255, green: 120/255, blue: 210/255, alpha: 1.0)
+        //newNavBarAppearance.backgroundColor = UIColor(red: 94/255, green: 187/255, blue: 230/255, alpha: 1.0)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         
-        // Navigation bar's title foreground color
-        newNavBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-        
-        // Apply the appearance to different styles:
-        navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
-        navigationController?.navigationBar.compactAppearance = newNavBarAppearance
-        navigationController?.navigationBar.standardAppearance = newNavBarAppearance
-        if #available(iOS 15.0, *) {
-            navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
+        if let colorHex = selectedCategory?.color {
+            
+            title = selectedCategory!.name
+            
+            guard let navBar = navigationController?.navigationBar else {fatalError("Navigation controller does not exist")}
+            if let navBarColor = UIColor(hexString: colorHex) {
+                navBar.barTintColor = UIColor(hexString: colorHex)
+                navBar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+                navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColor,  returnFlat: true)]
+                searchBar.barTintColor = UIColor(hexString: colorHex)
+            }
+            
+           
         }
-        
     }
     
     //MARK: - Tableview Datasource Methods.
@@ -65,21 +77,32 @@ class PadLadViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         //number of items
-        return itemArray.count
+        return padItems?.count ?? 1
     }
     
     //which tableView cell will show?
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "PadLadCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        let item = itemArray[indexPath.row]
-        
-        cell.textLabel?.text  = item.title
-        
-        //Ternary Operator:
-        //checkmark logic
-        cell.accessoryType = item.done == true ? .checkmark : .none
+        if let item = padItems?[indexPath.row]{
+           
+            cell.textLabel?.text  = item.title
+            
+            if let color = UIColor(hexString: selectedCategory!.color)?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(padItems!.count)){
+                
+                cell.backgroundColor = color
+                cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+            }
+            
+            //Ternary Operator:
+            //checkmark logic
+            cell.accessoryType = item.done == true ? .checkmark : .none
+            
+            
+        }else{
+            cell.textLabel?.text = "No Items Added"
+        }
         
         return cell
     }
@@ -88,14 +111,18 @@ class PadLadViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-            //        let cell = itemArray[indexPath.row]
-        
-        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        
-        saveItems()
-       
-        //forced tableview to call datasource methods again
-        //tableView.reloadData()
+        if let item = padItems?[indexPath.row] {
+            do {
+                try realm.write {
+                   item.done = !item.done
+                   //realm.delete(item)
+                    
+                }
+            }catch {
+                print("error saving done status, \(error)")
+            }
+        }
+        tableView.reloadData()
         
         //goes back to being white.
         tableView.deselectRow(at: indexPath, animated: true)
@@ -115,16 +142,22 @@ class PadLadViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default){(action) in
             
             //what will happen once the user clicks the add item button
-            
-            let newItem = Item(context: self.context)
-            newItem.title = textField.text!
-            newItem.done = false
-            self.itemArray.append(newItem)
-            print("added new item")
-            self.saveItems()
-            
-            //this is needed to show the new data. 
+            if let currentCategory = self.selectedCategory {
+                do{
+                    try self.realm.write {
+                        let newItem = Item()
+                        newItem.title = textField.text!
+                        newItem.dateCreated = Date()
+                        currentCategory.items.append(newItem)
+                    }
+                }catch{
+                    print("Error saving items, \(error)")
+                }
+            }
+        
             self.tableView.reloadData()
+            
+            
             
         }
         //show textfield
@@ -140,31 +173,55 @@ class PadLadViewController: UITableViewController {
     
     //MARK: Model Manipulation Methods
     //CREATE
-    func saveItems(){
-        do{
-            try context.save()
-            print("saved items")
-        }catch{
-            print("Error saving context \(error)")
-        }
-        
-        self.tableView.reloadData()
-    }
+    //    func saveItems(){
+    //        do{
+    //            try context.save()
+    //            print("saved items")
+    //        }catch{
+    //            print("Error saving context \(error)")
+    //        }
+    //
+    //        self.tableView.reloadData()
+    //    }
     
     //READ
     //This method has a default value
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
-       
-        do{
-            itemArray = try context.fetch(request)
-            print("loaded")
-        } catch {
-            print("error fetching data from context \(error)")
-        }
+    func loadItems() {
+        
+
+        padItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        //CoreData:
+        //        //overrides the predicate
+        //        let predicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        //
+        //        request.predicate = predicate
+        //
+        //        do{
+        //            itemArray = try context.fetch(request)
+        //            print("loaded")
+        //        } catch {
+        //            print("error fetching data from context \(error)")
+        //        }
         
         tableView.reloadData()
         
         
+    }
+    
+    //MARK: -- Delete Data from Swipe
+    //Items updateModel version
+    override func updateModel(at indexPath: IndexPath) {
+        //if the category is present and exists..
+                if let itemsDeletion = self.padItems?[indexPath.row]{
+                    do {
+                        try self.realm.write {
+                            self.realm.delete(itemsDeletion)
+                        }
+                    }catch{
+                        print("Error deleting category, \(error)")
+                    }
+
+                }
     }
     
 }
@@ -173,17 +230,23 @@ class PadLadViewController: UITableViewController {
 extension PadLadViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        padItems = padItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        
+        tableView.reloadData()
+       
+        //CoreData:
         //query database
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
-        
-        let predicate = NSPredicate(format: "title CONTAINS %@", searchBar.text!)
-        
-        request.predicate = predicate
-        
-        let sortDescriptr = NSSortDescriptor(key: "title", ascending: true)
-        request.sortDescriptors = [sortDescriptr]
-        
-        loadItems(with: request)
+        //        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        //
+        //        let predicate = NSPredicate(format: "title CONTAINS %@", searchBar.text!)
+        //
+        //        request.predicate = predicate
+        //
+        //        let sortDescriptr = NSSortDescriptor(key: "title", ascending: true)
+        //        request.sortDescriptors = [sortDescriptr]
+        //
+        //        loadItems(with: request)
         
         
     }
